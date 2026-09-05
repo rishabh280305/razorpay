@@ -3,7 +3,9 @@ node_modules/
 coverage/
 .env
 .env.local
+.env*.local
 .vercel/
 *.tsbuildinfo
 
 .vercel
+.env*.local
