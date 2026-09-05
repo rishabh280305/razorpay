@@ -1,6 +1,6 @@
 # ACP and MCP
 
-ACP is currently beta. AGENTREADY uses the latest stable specification reviewed during build: `2026-04-17` from the official Agentic Commerce Protocol repository.
+ACP is currently beta. KARATSUBA uses the latest stable specification reviewed during build: `2026-04-17` from the official Agentic Commerce Protocol repository.
 
 ## Implemented ACP profile
 
@@ -20,4 +20,4 @@ The deployed Streamable HTTP JSON-RPC server is discoverable at `/.well-known/mc
 
 ## AP2 / x402 / UAP scope
 
-The mandate hash and receipt evidence are an AP2-inspired compatibility representation. AGENTREADY is not AP2 certified. x402 is not implemented because it is a crypto payment protocol and not a Razorpay settlement substitute. NPCI UAP is labeled only as a future “UAP-ready policy model” because no sufficiently detailed public merchant implementation spec was relied upon.
+The mandate hash and receipt evidence are an AP2-inspired compatibility representation. KARATSUBA is not AP2 certified. x402 is not implemented because it is a crypto payment protocol and not a Razorpay settlement substitute. NPCI UAP is labeled only as a future “UAP-ready policy model” because no sufficiently detailed public merchant implementation spec was relied upon.

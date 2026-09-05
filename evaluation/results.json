@@ -13,5 +13,5 @@
   "acceptanceRatePercent": 42.9,
   "checkoutCompletionProxyPercent": 88.2,
   "status": "offline synthetic evaluation",
-  "notes": "Same fixed buyer population and seed are used for baseline and AgentReady treatment."
+  "notes": "Same fixed buyer population and seed are used for baseline and Karatsuba treatment."
 }

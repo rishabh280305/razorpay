@@ -10,7 +10,7 @@ const version = "2026-04-17";
 const schema = z.object({ line_items: z.array(z.object({ product_id: z.string(), quantity: z.number().int().positive().max(10) })).min(1), mandate: z.object({ id: z.string(), merchantId: z.string(), maxAmountPaise: z.number().int().positive(), categories: z.array(z.string()), maxQuantity: z.number().int().positive(), expiresAt: z.string().datetime(), recurringAllowed: z.boolean(), approvalThresholdPaise: z.number().int().positive(), canonicalHash: z.string().optional() }), proposed_total_paise: z.number().int().positive().optional() });
 const responseHeaders = (requestId: string) => ({ "API-Version": version, "X-Request-ID": requestId, "Cache-Control": "no-store" });
 
-export function GET() { return NextResponse.json({ api_version: version, profile: "AgentReady ACP checkout-session implementation profile", persistence: "Neon Postgres", endpoints: ["POST /api/acp/checkout_sessions", "GET/PATCH /api/acp/checkout_sessions/:id", "POST /api/acp/checkout_sessions/:id/complete", "POST /api/acp/checkout_sessions/:id/cancel"], guarantees: ["authoritative cart totals", "durable idempotency", "request IDs", "deterministic policy firewall", "same audit pipeline as UI checkout"] }); }
+export function GET() { return NextResponse.json({ api_version: version, profile: "Karatsuba ACP checkout-session implementation profile", persistence: "Neon Postgres", endpoints: ["POST /api/acp/checkout_sessions", "GET/PATCH /api/acp/checkout_sessions/:id", "POST /api/acp/checkout_sessions/:id/complete", "POST /api/acp/checkout_sessions/:id/cancel"], guarantees: ["authoritative cart totals", "durable idempotency", "request IDs", "deterministic policy firewall", "same audit pipeline as UI checkout"] }); }
 
 export async function POST(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") ?? randomUUID();
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   const existing = await getCheckoutContext(existingId);
   if (existing) return NextResponse.json({ api_version: version, checkout_session: { id: existing.checkout.id, state: existing.checkout.state, request_id: existing.checkout.requestId, line_items: existing.checkout.lineItems, authoritative_total_paise: existing.checkout.authoritativeTotalPaise, policy: { decision: existing.checkout.policyDecision, reasonCodes: existing.checkout.reasonCodes } }, idempotent_replay: true }, { headers: responseHeaders(requestId) });
   const parsed = schema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: { code: "invalid_request", message: "line_items and mandate must match the AgentReady ACP profile" }, request_id: requestId }, { status: 400, headers: responseHeaders(requestId) });
+  if (!parsed.success) return NextResponse.json({ error: { code: "invalid_request", message: "line_items and mandate must match the Karatsuba ACP profile" }, request_id: requestId }, { status: 400, headers: responseHeaders(requestId) });
   const catalog = await getCatalogProducts(parsed.data.line_items.map(item => item.product_id));
   const hash = canonicalMandateHash(parsed.data.mandate);
   const mandate = { ...parsed.data.mandate, canonicalHash: hash };

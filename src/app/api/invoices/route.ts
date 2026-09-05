@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   const mandate = { ...parsed.data.mandate, canonicalHash };
   const [catalog, durableApproval] = await Promise.all([getCatalogProducts(parsed.data.items.map(item => item.productId)), isMandateApproved(mandate.id, canonicalHash)]);
   let policy;
-  try { policy = evaluatePolicyWithCatalog({ items: parsed.data.items, mandate, catalog, proposedTotalPaise: parsed.data.proposedTotalPaise, controls: { expectedAgentIdentity: "agentready-invoice", actualAgentIdentity: "agentready-invoice" } }); }
+  try { policy = evaluatePolicyWithCatalog({ items: parsed.data.items, mandate, catalog, proposedTotalPaise: parsed.data.proposedTotalPaise, controls: { expectedAgentIdentity: "karatsuba-invoice", actualAgentIdentity: "karatsuba-invoice" } }); }
   catch { return NextResponse.json({ error: "One or more catalog product IDs are invalid", requestId }, { status: 400 }); }
   if (policy.decision === "DENY" || (policy.decision === "REQUIRE_APPROVAL" && !durableApproval)) return NextResponse.json({ state: policy.decision === "DENY" ? "POLICY_BLOCKED" : "AWAITING_APPROVAL", policy, error: "A valid durable mandate approval is required", requestId }, { status: 409 });
 

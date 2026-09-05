@@ -19,10 +19,10 @@ export async function findTestOrderByReceipt(receipt: string) {
 export async function createTestInvoice(input: { receipt: string; mandateHash: string; items: Array<{ name: string; description: string; amount: number; quantity: number }> }) {
   return razorpayClient().invoices.create({
     type: "invoice",
-    description: "AgentReady policy-authorized B2B cart",
+    description: "Karatsuba policy-authorized B2B cart",
     receipt: input.receipt,
     currency: "INR",
-    customer: { name: "AgentReady Demo Buyer", email: "buyer@example.com", contact: "+919000000000" },
+    customer: { name: "Karatsuba Demo Buyer", email: "buyer@example.com", contact: "+919000000000" },
     line_items: input.items.map(item => ({ ...item, currency: "INR" })),
     expire_by: Math.floor(Date.now() / 1000) + 60 * 60,
     sms_notify: false,
@@ -39,8 +39,8 @@ export async function findTestInvoiceByReceipt(receipt: string) {
 
 export async function findOrCreateMonthlyTestPlan(input: { productId: string; name: string; description: string; amount: number }) {
   const plans = await razorpayClient().plans.all({ count: 100 });
-  const existing = plans.items.find(plan => plan.period === "monthly" && plan.interval === 1 && Number(plan.item.amount) === input.amount && plan.notes?.agentready_product_id === input.productId);
-  return existing ?? razorpayClient().plans.create({ period: "monthly", interval: 1, item: { name: input.name, description: input.description, amount: input.amount, currency: "INR" }, notes: { agentready_product_id: input.productId, environment: "test" } });
+  const existing = plans.items.find(plan => plan.period === "monthly" && plan.interval === 1 && Number(plan.item.amount) === input.amount && plan.notes?.karatsuba_product_id === input.productId);
+  return existing ?? razorpayClient().plans.create({ period: "monthly", interval: 1, item: { name: input.name, description: input.description, amount: input.amount, currency: "INR" }, notes: { karatsuba_product_id: input.productId, environment: "test" } });
 }
 
 export async function createTestSubscription(input: { planId: string; quantity: number; cycles: number; mandateHash: string; idempotencyFingerprint: string }) {
@@ -65,7 +65,7 @@ export async function refundTestPayment(input: { paymentId: string; amount: numb
   const response = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(input.paymentId)}/refund`, {
     method: "POST",
     headers: { authorization: `Basic ${authorization}`, "content-type": "application/json", "x-refund-idempotency": input.idempotencyKey },
-    body: JSON.stringify({ amount: input.amount, notes: { source: "agentready", authorization: "deterministic_full_refund" } }),
+    body: JSON.stringify({ amount: input.amount, notes: { source: "karatsuba", authorization: "deterministic_full_refund" } }),
     signal: AbortSignal.timeout(12_000),
   });
   const payload = await response.json() as { id?: string; status?: string; amount?: number; error?: { description?: string } };

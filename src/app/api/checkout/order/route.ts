@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   const authoritativeCatalog = await getCatalogProducts(parsed.data.items.map(item => item.productId));
   const baseCartTotalPaise = Math.max(...parsed.data.items.map(item => (authoritativeCatalog.find(product => product.id === item.productId)?.pricePaise ?? 0) * item.quantity));
   let policy;
-  try { policy = evaluatePolicyWithCatalog({ items: parsed.data.items, mandate, catalog: authoritativeCatalog, proposedTotalPaise: parsed.data.proposedTotalPaise, previousExecution: false, controls: { baseCartTotalPaise, expectedAgentIdentity: "agentready-web", actualAgentIdentity: "agentready-web" } }); }
+  try { policy = evaluatePolicyWithCatalog({ items: parsed.data.items, mandate, catalog: authoritativeCatalog, proposedTotalPaise: parsed.data.proposedTotalPaise, previousExecution: false, controls: { baseCartTotalPaise, expectedAgentIdentity: "karatsuba-web", actualAgentIdentity: "karatsuba-web" } }); }
   catch { return NextResponse.json({ error: "One or more catalog product IDs are invalid", requestId }, { status: 400 }); }
   if (policy.decision === "DENY" || (policy.decision === "REQUIRE_APPROVAL" && !durableApproval)) return NextResponse.json({ policy, state: policy.decision === "DENY" ? "POLICY_BLOCKED" : "AWAITING_APPROVAL", error: policy.decision === "REQUIRE_APPROVAL" ? "A durable matching mandate approval is required; the browser boolean is not authority." : undefined, requestId }, { status: 409 });
   const receipt = `ar_${createHash("sha256").update(key).digest("hex").slice(0, 18)}`;
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   const existing = await findTestOrderByReceipt(receipt);
   if (claim.kind === "in_progress" && !existing) return NextResponse.json({ error: "An identical checkout is already in progress", requestId }, { status: 409, headers: { "Retry-After": "2" } });
   if (existing && (existing.notes?.idempotency_fingerprint !== fingerprint || Number(existing.amount) !== policy.authoritativeTotalPaise)) return NextResponse.json({ error: "Idempotency-Key was already used with a different checkout payload", requestId }, { status: 409 });
-  const order = existing ?? await createTestOrder({ amount: policy.authoritativeTotalPaise, receipt, notes: { agentready_request_id: requestId, mandate_hash: canonicalHash, idempotency_fingerprint: fingerprint } });
+  const order = existing ?? await createTestOrder({ amount: policy.authoritativeTotalPaise, receipt, notes: { karatsuba_request_id: requestId, mandate_hash: canonicalHash, idempotency_fingerprint: fingerprint } });
   const response = { order: { id: order.id, amount: order.amount, currency: order.currency, status: order.status }, keyId: process.env.RAZORPAY_KEY_ID, policy, mandateHash: canonicalHash, state: "RAZORPAY_ORDER_CREATED", idempotentReplay: Boolean(existing), requestId };
   const context = await persistCheckoutContext({ key, requestId, mandate, mandatePayload: mandate, items: parsed.data.items, totalPaise: policy.authoritativeTotalPaise, policyDecision: policy.decision, reasonCodes: policy.reasonCodes, channel: "web", approved: durableApproval });
   await persistOrder({ razorpayOrderId: order.id, amountPaise: policy.authoritativeTotalPaise, idempotencyKey: key, mandateHash: canonicalHash, checkoutSessionId: context?.checkoutId });

@@ -25,7 +25,7 @@ const bodySchema = z.object({ products: z.array(productSchema).min(1).max(250) }
 
 function authorized(request: NextRequest) {
   const expected = process.env.CATALOG_ADMIN_KEY;
-  const supplied = request.headers.get("x-agentready-admin-key");
+  const supplied = request.headers.get("x-karatsuba-admin-key");
   if (!expected || !supplied || expected.length !== supplied.length) return false;
   return timingSafeEqual(Buffer.from(expected), Buffer.from(supplied));
 }
@@ -36,7 +36,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!authorized(request)) return NextResponse.json({ error: "Catalog writes require x-agentready-admin-key." }, { status: 401 });
+  if (!authorized(request)) return NextResponse.json({ error: "Catalog writes require x-karatsuba-admin-key." }, { status: 401 });
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid catalog payload", issues: parsed.error.issues.map(issue => ({ path: issue.path.join("."), message: issue.message })) }, { status: 400 });
   const saved = await upsertCatalogProducts(parsed.data.products);

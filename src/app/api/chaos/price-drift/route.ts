@@ -17,5 +17,5 @@ export async function POST(request: NextRequest) {
     mandateHash: "price-drift-fixture",
     requestId,
   });
-  return NextResponse.json({ scenario: "PRICE_DRIFT_DURING_AGENT_CHECKOUT", ...result, auditEventId: audit?.id ?? null, outcome: "Execution stopped before the Razorpay client was invoked.", requestId }, { status: 409, headers: { "X-AgentReady-Safe-Failure": "true", "X-Request-ID": requestId } });
+  return NextResponse.json({ scenario: "PRICE_DRIFT_DURING_AGENT_CHECKOUT", ...result, auditEventId: audit?.id ?? null, outcome: "Execution stopped before the Razorpay client was invoked.", requestId }, { status: 409, headers: { "X-Karatsuba-Safe-Failure": "true", "X-Request-ID": requestId } });
 }

@@ -17,12 +17,12 @@ function rpc(id: unknown, result: unknown, status = 200) { return NextResponse.j
 function error(id: unknown, code: number, message: string, status = 400) { return NextResponse.json({ jsonrpc: "2.0", id, error: { code, message } }, { status }); }
 const envelope = z.object({ jsonrpc: z.literal("2.0"), id: z.union([z.string(), z.number()]).optional(), method: z.string(), params: z.record(z.string(), z.unknown()).optional() });
 
-export function GET() { return NextResponse.json({ name: "AgentReady MCP", protocolVersion, transport: "Streamable HTTP JSON-RPC", endpoint: "/api/mcp", tools: toolDefinitions.map(({ name, description }) => ({ name, description })), safety: "Payment execution is not exposed; checkout evaluation uses the deterministic policy firewall." }); }
+export function GET() { return NextResponse.json({ name: "Karatsuba MCP", protocolVersion, transport: "Streamable HTTP JSON-RPC", endpoint: "/api/mcp", tools: toolDefinitions.map(({ name, description }) => ({ name, description })), safety: "Payment execution is not exposed; checkout evaluation uses the deterministic policy firewall." }); }
 export async function POST(request: NextRequest) {
   const parsed = envelope.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return error(null, -32600, "Invalid JSON-RPC request");
   const { id = null, method, params = {} } = parsed.data;
-  if (method === "initialize") return rpc(id, { protocolVersion, capabilities: { tools: { listChanged: false } }, serverInfo: { name: "agentready", version: "0.2.0" }, instructions: "Use product IDs returned by the authoritative catalog. Payment execution remains policy-gated outside MCP." });
+  if (method === "initialize") return rpc(id, { protocolVersion, capabilities: { tools: { listChanged: false } }, serverInfo: { name: "karatsuba", version: "0.2.0" }, instructions: "Use product IDs returned by the authoritative catalog. Payment execution remains policy-gated outside MCP." });
   if (method === "tools/list") return rpc(id, { tools: toolDefinitions });
   if (method !== "tools/call") return error(id, -32601, "Method not found", 404);
   const name = typeof params.name === "string" ? params.name : "";

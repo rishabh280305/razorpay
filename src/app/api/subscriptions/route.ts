@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   const product = catalog[0];
   if (!product || product.id !== parsed.data.productId) return NextResponse.json({ error: "Unknown catalog product", requestId }, { status: 400 });
   if (!product.subscriptionEligible) return NextResponse.json({ error: "Product is not eligible for recurring purchase", code: "RECURRING_PRODUCT_INELIGIBLE", requestId }, { status: 409 });
-  const policy = evaluatePolicyWithCatalog({ items: [{ productId: product.id, quantity: parsed.data.quantity }], mandate, catalog, proposedTotalPaise: parsed.data.proposedTotalPaise, controls: { recurringRequested: true, expectedAgentIdentity: "agentready-subscription", actualAgentIdentity: "agentready-subscription" } });
+  const policy = evaluatePolicyWithCatalog({ items: [{ productId: product.id, quantity: parsed.data.quantity }], mandate, catalog, proposedTotalPaise: parsed.data.proposedTotalPaise, controls: { recurringRequested: true, expectedAgentIdentity: "karatsuba-subscription", actualAgentIdentity: "karatsuba-subscription" } });
   if (policy.decision === "DENY" || !durableApproval) return NextResponse.json({ state: policy.decision === "DENY" ? "POLICY_BLOCKED" : "AWAITING_APPROVAL", policy, error: "A recurring-enabled durable mandate approval is required", requestId }, { status: 409 });
 
   const fingerprint = createHash("sha256").update(JSON.stringify({ operation: "subscription", productId: product.id, quantity: parsed.data.quantity, cycles: parsed.data.cycles, canonicalHash })).digest("hex");

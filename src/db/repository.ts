@@ -114,7 +114,7 @@ export async function appendPersistentAudit(input: { sessionId?: string; actor: 
   const db = getDb();
   if (!db) return null;
   return db.transaction(async tx => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('agentready_audit_chain'))`);
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('karatsuba_audit_chain'))`);
     const [previous] = await tx.select({ currentHash: auditEvents.currentHash }).from(auditEvents).orderBy(desc(auditEvents.createdAt)).limit(1);
     const previousHash = previous?.currentHash ?? "GENESIS";
     const id = randomUUID();

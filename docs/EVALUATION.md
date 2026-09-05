@@ -11,7 +11,7 @@ Baseline chooses the buyer’s primary product. Treatment considers a compatible
 | Metric | Result |
 |---|---:|
 | Baseline GMV | ₹7,43,564 |
-| AgentReady GMV | ₹8,24,300 |
+| Karatsuba GMV | ₹8,24,300 |
 | Incremental simulated GMV | ₹80,736 (+10.9%) |
 | Baseline AOV | ₹1,487.13 |
 | Treatment AOV | ₹1,648.60 |

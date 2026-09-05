@@ -35,7 +35,7 @@
 
 ## Credentials / manual actions still needed
 
-1. Configure the TEST webhook at `https://agentready-beige.vercel.app/api/webhooks/razorpay` for `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid` using the same configured secret.
+1. Configure the TEST webhook at `https://karatsuba-ai.vercel.app/api/webhooks/razorpay` for `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid` using the same configured secret.
 2. Complete one manual Razorpay TEST Checkout so payment capture and Razorpay-delivered webhook finality can be honestly marked verified.
 3. Optional: set `CATALOG_ADMIN_KEY` to enable authenticated catalog writes (reads and file validation already work).
 
@@ -45,4 +45,4 @@
 
 ## Current blocker
 
-Only dashboard webhook enablement and one manual TEST payment block a Razorpay-delivered end-to-end receipt. Database, hosted AI, Razorpay TEST Orders/Payment Links/Invoices, webhook signature enforcement and application deployment are active. Public demo: `https://agentready-beige.vercel.app`.
+Only dashboard webhook enablement and one manual TEST payment block a Razorpay-delivered end-to-end receipt. Database, hosted AI, Razorpay TEST Orders/Payment Links/Invoices, webhook signature enforcement and application deployment are active. Public demo: `https://karatsuba-ai.vercel.app`.

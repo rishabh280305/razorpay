@@ -1,12 +1,12 @@
 # Architecture
 
-AGENTREADY is a commerce control plane, not an LLM with payment credentials. The buyer-facing agent and merchant-side Growth Agent may propose structured actions. A server-side domain layer re-resolves every product ID against authoritative catalog data, recomputes integer-paise totals, validates mandate bounds, then gates Razorpay execution.
+KARATSUBA is a commerce control plane, not an LLM with payment credentials. The buyer-facing agent and merchant-side Growth Agent may propose structured actions. A server-side domain layer re-resolves every product ID against authoritative catalog data, recomputes integer-paise totals, validates mandate bounds, then gates Razorpay execution.
 
 ```mermaid
 sequenceDiagram
   participant A as AI buyer / ACP client
   participant O as OpenAI intent extractor
-  participant C as AgentReady commerce core + Neon
+  participant C as Karatsuba commerce core + Neon
   participant P as Deterministic policy
   participant R as Razorpay TEST
   participant W as Webhook endpoint

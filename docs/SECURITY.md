@@ -10,7 +10,7 @@
 
 The order adapter atomically claims a unique idempotency record in Neon, derives a deterministic Razorpay receipt, and reconciles with Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. Production smoke testing confirmed one Order ID across two identical requests.
 
-Invoice and Subscription adapters reuse the same ledger and deterministic request fingerprints. Invoice line items are rebuilt from the current Neon rows. Subscription creation additionally requires `subscriptionEligible` catalog metadata and a canonical mandate with `recurringAllowed: true`; Plans are reconciled before creation because Razorpay Plans are immutable. The Refund adapter never accepts an amount: it looks up a captured AgentReady order by verified Razorpay payment ID, derives a full refund from stored paise, requires a literal human confirmation, and forwards the request key through Razorpay's `X-Refund-Idempotency` header.
+Invoice and Subscription adapters reuse the same ledger and deterministic request fingerprints. Invoice line items are rebuilt from the current Neon rows. Subscription creation additionally requires `subscriptionEligible` catalog metadata and a canonical mandate with `recurringAllowed: true`; Plans are reconciled before creation because Razorpay Plans are immutable. The Refund adapter never accepts an amount: it looks up a captured Karatsuba order by verified Razorpay payment ID, derives a full refund from stored paise, requires a literal human confirmation, and forwards the request key through Razorpay's `X-Refund-Idempotency` header.
 
 ## Webhooks and Checkout
 
@@ -24,7 +24,7 @@ Policy returns only `ALLOW`, `DENY`, `REQUIRE_APPROVAL`. It covers transaction/d
 
 Security headers are set globally. API request IDs are passed through. User-facing errors are generic; structured logs strip key/token/secret/signature/prompt fields. Webhook event hashes and idempotency claims have database uniqueness constraints. The expensive AI route is rate-limited; multi-region production scale would move its short window counter to managed Redis.
 
-Catalog writes require a constant-time checked `x-agentready-admin-key`; the public browser exposes read and validation flows only. OpenAI responses are created with `store: false`, a 12-second timeout and one bounded retry.
+Catalog writes require a constant-time checked `x-karatsuba-admin-key`; the public browser exposes read and validation flows only. OpenAI responses are created with `store: false`, a 12-second timeout and one bounded retry.
 
 ## Audit privacy
 

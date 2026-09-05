@@ -1,14 +1,25 @@
-# AGENTREADY
+# KARATSUBA
 
 > **Turn any Razorpay merchant into a safe, AI-buyable storefront.**
 
-AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Buildathon, Track 01 — **AI Growth & Agentic Commerce**. It deliberately separates intelligence from authority:
+KARATSUBA is a full-stack agentic-commerce control plane that turns merchant catalogs into safe, programmable storefronts for AI buyers. It deliberately separates intelligence from authority:
 
 **AI proposes. Authoritative data verifies. Policy authorizes. Razorpay executes. Webhooks confirm. Audit records.**
 
-**Public demo:** https://agentready-beige.vercel.app
+**Public demo:** https://karatsuba-ai.vercel.app
 
-![AgentReady control plane](public/agentready-hero.png)
+![Karatsuba control plane](public/karatsuba-hero.png)
+
+## Product objective
+
+AI agents can search and recommend products, but they should not be trusted with unrestricted authority over prices, inventory or payments. Karatsuba gives merchants an agent-readable catalog and growth engine while enforcing a deterministic execution contract for every consequential action.
+
+The product solves four connected problems:
+
+1. It makes a merchant catalog discoverable through structured feeds, ACP checkout sessions and bounded MCP tools.
+2. It converts natural-language shopping requests into explicit budgets, preferences, exclusions and recurring-purchase intent.
+3. It grows the basket with transparent, constraint-respecting cross-sells instead of silently manipulating the cart.
+4. It authorizes money through fresh catalog reads, hash-bound mandates, deterministic policy, Razorpay TEST rails, verified webhooks and a tamper-evident audit trail.
 
 ## 30-second walkthrough
 
@@ -73,7 +84,7 @@ The integration is intentionally TEST MODE only. `POST /api/checkout/order` deri
 
 Production smoke verification created a ₹1,498 TEST Order, ₹1,498 TEST Payment Link and ₹1,498 issued TEST Invoice. A duplicate request with the same idempotency key returned the same Razorpay Order ID. This TEST account rejected Subscription creation, which the product reports as unavailable instead of faking success. No payment was captured during this automated smoke test.
 
-The secondary operations use the same safety boundary. [Invoices](https://razorpay.com/docs/api/payments/invoices/create-with-details/) rebuild line items from Neon and require a matching durable mandate. [Subscriptions](https://razorpay.com/docs/api/payments/subscriptions/create-subscription/) require a subscription-eligible product and a mandate whose canonical payload explicitly allows recurring spend. Refund requests accept no amount from the browser: they resolve a captured AgentReady payment, derive the full stored order amount, require an explicit confirmation phrase, and forward the same idempotency key in Razorpay's [`X-Refund-Idempotency`](https://razorpay.com/docs/api/refunds/normal-refunds-idempotent/) header. Account availability and production smoke status are reported separately below; an implemented adapter is not described as verified until exercised.
+The secondary operations use the same safety boundary. [Invoices](https://razorpay.com/docs/api/payments/invoices/create-with-details/) rebuild line items from Neon and require a matching durable mandate. [Subscriptions](https://razorpay.com/docs/api/payments/subscriptions/create-subscription/) require a subscription-eligible product and a mandate whose canonical payload explicitly allows recurring spend. Refund requests accept no amount from the browser: they resolve a captured Karatsuba payment, derive the full stored order amount, require an explicit confirmation phrase, and forward the same idempotency key in Razorpay's [`X-Refund-Idempotency`](https://razorpay.com/docs/api/refunds/normal-refunds-idempotent/) header. Account availability and production smoke status are reported separately below; an implemented adapter is not described as verified until exercised.
 
 Webhook endpoint: `POST /api/webhooks/razorpay`
 
@@ -86,7 +97,7 @@ For standard Checkout, client completion is only a UX signal. Server verificatio
 
 ## Protocols
 
-**ACP.** The adapter follows the current stable ACP checkout-session shape at `/api/acp/checkout_sessions`: create, retrieve, update, complete, cancel, version header, request ID and idempotency. ACP remains beta; AGENTREADY labels this implementation as an **ACP implementation profile**, not a certification. See [docs/ACP.md](docs/ACP.md) and the [official ACP repository](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol).
+**ACP.** The adapter follows the current stable ACP checkout-session shape at `/api/acp/checkout_sessions`: create, retrieve, update, complete, cancel, version header, request ID and idempotency. ACP remains beta; KARATSUBA labels this implementation as an **ACP implementation profile**, not a certification. See [docs/ACP.md](docs/ACP.md) and the [official ACP repository](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol).
 
 **AP2.** A canonical intent/mandate hash is linked to policy and payment evidence, inspired by AP2’s Checkout Mandate / Receipt model. This is **AP2 compatibility concept only**, not official certification. [AP2 specification](https://github.com/google-agentic-commerce/AP2/blob/main/docs/ap2/specification.md).
 
@@ -96,7 +107,7 @@ For standard Checkout, client completion is only a UX signal. Server verificatio
 
 `npm run benchmark` evaluates 500 synthetic, fixed-seed (`20260219`) sessions. Both baseline and treatment use the same buyer population. The treatment adds only compatible, budget-fitting proposals; simulated acceptance is a documented utility model—not self-reported revenue.
 
-Current generated result: baseline GMV **₹7,43,564**, AgentReady GMV **₹8,24,300**, incremental simulated GMV **₹80,736 (+10.9%)**, attach rate **32.8%**, eligible-recommendation acceptance **42.9%**, budget/policy violations **0.0%**. Full methodology: [docs/EVALUATION.md](docs/EVALUATION.md).
+Current generated result: baseline GMV **₹7,43,564**, Karatsuba GMV **₹8,24,300**, incremental simulated GMV **₹80,736 (+10.9%)**, attach rate **32.8%**, eligible-recommendation acceptance **42.9%**, budget/policy violations **0.0%**. Full methodology: [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Failure demo
 
@@ -181,13 +192,13 @@ evaluation/        generated offline benchmark artifact
 docs/              architecture, security, protocol, demo and pitch material
 ```
 
-Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo Script](docs/DEMO_SCRIPT.md), and [Pitch](docs/PITCH.md) for judging.
+Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo Script](docs/DEMO_SCRIPT.md), [Submission Answers](docs/SUBMISSION_ANSWERS.md), and [Pitch](docs/PITCH.md) for a complete product and engineering walkthrough.
 
 ## Limitations and next steps
 
 - The public deployment is a single demo merchant and intentionally omits end-user authentication; catalog mutation is therefore admin-key protected rather than exposed in the browser.
 - OpenAI is used for bounded intent extraction, not payment decisions. A model/API failure falls back to deterministic parsing and is labeled in the UI.
-- The Invoice adapter is TEST-account verified. The Subscription adapter is implemented but this TEST account rejects creation and the UI says so. Refunds remain deliberately unavailable until a verified webhook marks an AgentReady payment captured.
+- The Invoice adapter is TEST-account verified. The Subscription adapter is implemented but this TEST account rejects creation and the UI says so. Refunds remain deliberately unavailable until a verified webhook marks a Karatsuba payment captured.
 - No claim of ACP/AP2 certification, UAP compliance, x402 settlement, or live payment processing is made.
 
 ## What broke, and what we fixed
