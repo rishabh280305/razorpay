@@ -13,7 +13,7 @@
 - [x] Premium command center, buyer/growth experience, catalog, policy, protocol, audit, evaluation, chaos and judge surfaces.
 - [x] Policy, state-machine, audit hashing, Razorpay signature helpers, ACP session adapter, health/feed endpoints.
 - [x] Fixed-seed 500-session benchmark artifact and safety tests.
-- [x] Documentation and CI workflow.
+- [x] Documentation, CI workflow, GitHub push and Vercel production deployment.
 
 ## Credentials / manual actions still needed
 
@@ -28,4 +28,4 @@
 
 ## Current blocker
 
-Credentials are not present; no real Razorpay order, webhook delivery, durable database write, or hosted LLM operation can honestly be verified yet.
+Credentials are not present; no real Razorpay order, webhook delivery, durable database write, or hosted LLM operation can honestly be verified yet. Public demo: `https://agentready-beige.vercel.app`.

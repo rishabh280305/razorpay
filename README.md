@@ -6,6 +6,8 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 **AI proposes. Authoritative data verifies. Policy authorizes. Razorpay executes. Webhooks confirm. Audit records.**
 
+**Public demo:** https://agentready-beige.vercel.app
+
 ## 30-second walkthrough
 
 1. A buyer describes a bounded intent: “sensitive-skin routine under ₹2,000; no fragrance.”
