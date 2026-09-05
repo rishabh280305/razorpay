@@ -4,19 +4,20 @@
 
 ## Method
 
-Baseline chooses the buyer’s primary product. Treatment considers a narrowly defined compatible add-on only if it fits the same session budget. A deterministic seeded utility model accepts some relevant, compatible proposals; it is explicitly an assumption, not observed conversion. Both arms use identical synthetic sessions, budgets and initial selections.
+Baseline chooses the buyer’s primary product. Treatment considers a compatible add-on only if it fits the same session budget. The buyer population spans weighted skincare, coffee replenishment, employee gifting, running and USB-C charging archetypes. For each shopper, a fixed-seed utility function independently combines recommendation relevance, product compatibility, preference match, add-on budget share and price sensitivity. The acceptance draw is not copied from the Growth Agent rule. It is explicitly a simulation assumption, not observed conversion. Both arms use identical shoppers, budgets and initial selections.
 
 ## Latest artifact
 
 | Metric | Result |
 |---|---:|
-| Baseline GMV | ₹3,68,600 |
-| AgentReady GMV | ₹4,15,924 |
-| Incremental simulated GMV | ₹47,324 (+12.8%) |
-| Baseline AOV | ₹737.20 |
-| Treatment AOV | ₹831.85 |
-| Attach / acceptance rate | 15.2% |
+| Baseline GMV | ₹7,43,564 |
+| AgentReady GMV | ₹8,24,300 |
+| Incremental simulated GMV | ₹80,736 (+10.9%) |
+| Baseline AOV | ₹1,487.13 |
+| Treatment AOV | ₹1,648.60 |
+| Attach rate | 32.8% |
+| Eligible recommendation acceptance | 42.9% |
 | Budget / policy violations | 0.0% / 0.0% |
-| Checkout completion proxy | 91.4% |
+| Checkout completion proxy | 88.2% |
 
 The results must be regenerated after changing the model. No benchmark creates Razorpay Orders, Payment Links, invoices or subscriptions.

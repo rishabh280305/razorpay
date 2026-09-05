@@ -25,6 +25,8 @@
 - [x] 14 pure safety/planning tests passing locally.
 - [x] Production OpenAI smoke: `gpt-5.4-mini-2026-03-17`, schema-valid intent, authoritative `p_cleanser` + `p_moisturizer`, ₹1,498 total, no fallback.
 - [x] Production ACP create/retrieve/replay used one durable checkout ID; chaos denial joined an intact 4/4 audit chain.
+- [x] Independent fixed-seed benchmark: 500 sessions, five archetypes, ₹80,736 incremental simulated GMV (+10.9%), 0% budget/policy violations.
+- [x] Production authorization smoke: client `approved: true` alone returned 409; persisted 64-character mandate hash returned 201 and unlocked one ₹1,498 Razorpay TEST Order.
 
 ## Credentials / manual actions still needed
 

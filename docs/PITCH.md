@@ -8,6 +8,6 @@ In the Golden Demo, a buyer requests a fragrance-free sensitive-skin routine und
 
 Then we break it on purpose. A server-side fixture moves an approved cart from ₹1,799 to ₹2,049. AgentReady returns `DENY`, writes the audit event and proves `razorpayActionCreated: false`. This is what safe autonomy looks like.
 
-For growth, we run the same 500-session synthetic population through baseline and treatment. The current reproducible result is +12.8% simulated GMV with no budget or policy violations. We label it synthetic because trust requires that honesty too.
+For growth, we run the same 500-session, five-archetype population through baseline and treatment. An independent seeded buyer-utility model—not the recommender’s own rule—produces +10.9% simulated GMV, 42.9% eligible recommendation acceptance, and no budget or policy violations. We label it synthetic because trust requires that honesty too.
 
 AgentReady gives Razorpay merchants an on-ramp to AI commerce: ACP-style sessions, MCP-safe tools, AP2-inspired mandates, Razorpay-native rails, and a judge-visible evidence chain. Creative intelligence for commerce; boring correctness for money.

@@ -89,9 +89,21 @@ export function rankCatalog(intent: BuyerIntent, catalog: Product[]) {
     .filter(product => product.available && product.inventory > 0)
     .filter(product => !intent.categories.length || intent.categories.includes(product.category))
     .filter(product => !intent.excludedTerms.some(term => searchable(product).includes(term) && !searchable(product).includes(`${term}-free`) && product.attributes.fragrance !== "none"))
-    .map(product => ({ product, score: queryTerms.reduce((score, term) => score + (searchable(product).includes(term) ? 2 : 0) + (product.name.toLowerCase().includes(term) ? 3 : 0), 0) + (intent.categories.includes(product.category) ? 4 : 0) + Math.min(3, product.crossSellIds.length) + (product.tags.includes("primary") ? 5 : 0) }))
+    .map(product => ({ product, score: queryTerms.reduce((score, term) => score + (searchable(product).includes(term) ? 2 : 0) + (product.name.toLowerCase().includes(term) ? 3 : 0), 0) + (intent.categories.includes(product.category) ? 4 : 0) + Math.min(3, product.crossSellIds.length) + (product.tags.includes("primary") || product.attributes.cableIncluded === "no" ? 5 : 0) }))
     .sort((a, b) => b.score - a.score || a.product.pricePaise - b.product.pricePaise)
     .map(item => item.product);
+}
+
+export function normalizeCatalogTaxonomy(intent: BuyerIntent, prompt: string, catalog: Product[]): BuyerIntent {
+  const available = new Set(catalog.map(product => product.category));
+  const signals = `${prompt} ${intent.searchQuery} ${intent.categories.join(" ")}`.toLowerCase();
+  const normalized = new Set(intent.categories.filter(category => available.has(category)));
+  if (/skin|beauty|cleanser|moisturi[sz]er|sunscreen/.test(signals) && available.has("skincare")) normalized.add("skincare");
+  if (/coffee|beans|brew|pantry/.test(signals)) { if (available.has("pantry")) normalized.add("pantry"); if (available.has("accessories")) normalized.add("accessories"); }
+  if (/gift|employee|present/.test(signals) && available.has("gifts")) normalized.add("gifts");
+  if (/run|jog|5k|trainer|fitness/.test(signals) && available.has("running")) normalized.add("running");
+  if (/electronic|charger|usb|cable|gan|laptop|phone/.test(signals) && available.has("electronics")) normalized.add("electronics");
+  return { ...intent, categories: [...normalized] };
 }
 
 export function buildBoundedPlan(intent: BuyerIntent, catalog: Product[], meta: Pick<CommercePlan, "provider" | "model" | "latencyMs" | "usage" | "safeFallback">): CommercePlan {
@@ -120,8 +132,9 @@ export async function planCommerce(prompt: string, catalog: Product[]): Promise<
   const startedAt = Date.now();
   try {
     const extracted = await extractWithOpenAI(prompt);
-    return buildBoundedPlan(extracted.intent, catalog, { provider: "openai", model: extracted.model, latencyMs: Date.now() - startedAt, usage: extracted.usage, safeFallback: false });
+    return buildBoundedPlan(normalizeCatalogTaxonomy(extracted.intent, prompt, catalog), catalog, { provider: "openai", model: extracted.model, latencyMs: Date.now() - startedAt, usage: extracted.usage, safeFallback: false });
   } catch {
-    return buildBoundedPlan(fallbackBuyerIntent(prompt), catalog, { provider: "deterministic-fallback", model: "fallback-v1", latencyMs: Date.now() - startedAt, usage: null, safeFallback: true });
+    const fallback = fallbackBuyerIntent(prompt);
+    return buildBoundedPlan(normalizeCatalogTaxonomy(fallback, prompt, catalog), catalog, { provider: "deterministic-fallback", model: "fallback-v1", latencyMs: Date.now() - startedAt, usage: null, safeFallback: true });
   }
 }

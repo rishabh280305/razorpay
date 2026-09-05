@@ -94,7 +94,7 @@ For standard Checkout, client completion is only a UX signal. Server verificatio
 
 `npm run benchmark` evaluates 500 synthetic, fixed-seed (`20260219`) sessions. Both baseline and treatment use the same buyer population. The treatment adds only compatible, budget-fitting proposals; simulated acceptance is a documented utility model—not self-reported revenue.
 
-Current generated result: baseline GMV **₹3,68,600**, AgentReady GMV **₹4,15,924**, incremental simulated GMV **₹47,324 (+12.8%)**, attach rate **15.2%**, budget/policy violations **0.0%**. Full methodology: [docs/EVALUATION.md](docs/EVALUATION.md).
+Current generated result: baseline GMV **₹7,43,564**, AgentReady GMV **₹8,24,300**, incremental simulated GMV **₹80,736 (+10.9%)**, attach rate **32.8%**, eligible-recommendation acceptance **42.9%**, budget/policy violations **0.0%**. Full methodology: [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Failure demo
 

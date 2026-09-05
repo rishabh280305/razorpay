@@ -12,6 +12,6 @@
 
 **3:40–4:20 — Interoperability.** Open Protocol Lab, catalog JSON feed and ACP lifecycle. “ACP/MCP are adapters to the same policy core; AP2 is accurately labeled as conceptual compatibility.”
 
-**4:20–4:45 — Growth evidence.** Show Growth Eval: 500 fixed-seed sessions, +12.8% simulated GMV, zero policy violations.
+**4:20–4:45 — Growth evidence.** Show Growth Eval: 500 fixed-seed sessions across five buyer archetypes, +10.9% simulated GMV, 42.9% eligible recommendation acceptance and zero policy violations.
 
 **4:45–5:00 — Why Razorpay.** “Razorpay remains the payment rail. AgentReady gives it merchant-ready agent commerce: bounded intent, legitimate authority, webhook-confirmed finality and an audit story.”

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBoundedPlan, fallbackBuyerIntent, rankCatalog } from "./ai";
+import { buildBoundedPlan, fallbackBuyerIntent, normalizeCatalogTaxonomy, rankCatalog } from "./ai";
 import { products } from "./catalog";
 
 describe("buyer and growth planning", () => {
@@ -30,5 +30,13 @@ describe("buyer and growth planning", () => {
     const plan = buildBoundedPlan(intent, products, { provider: "deterministic-fallback", model: "test", latencyMs: 0, usage: null, safeFallback: true });
     expect(plan.proposedTotalPaise).toBeLessThanOrEqual(70000);
     expect(plan.growthAmountPaise).toBe(0);
+  });
+
+  it("normalizes model taxonomy to canonical merchant categories", () => {
+    const raw = { ...fallbackBuyerIntent("Find a USB-C charger setup under ₹2,500."), categories: ["technology accessories"] };
+    const normalized = normalizeCatalogTaxonomy(raw, "Find a USB-C charger setup", products);
+    const plan = buildBoundedPlan(normalized, products, { provider: "deterministic-fallback", model: "test", latencyMs: 0, usage: null, safeFallback: true });
+    expect(normalized.categories).toContain("electronics");
+    expect(plan.items.map(item => item.id)).toEqual(["p_charger", "p_cable"]);
   });
 });
