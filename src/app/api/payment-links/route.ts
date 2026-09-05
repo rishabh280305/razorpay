@@ -1,0 +1,25 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createHash } from "crypto";
+import { razorpayClient } from "@/lib/razorpay";
+import { evaluatePolicy } from "@/lib/policy";
+import { canonicalMandateHash } from "@/lib/mandate";
+
+const schema = z.object({
+  items: z.array(z.object({ productId: z.string(), quantity: z.number().int().positive().max(10) })).min(1),
+  mandate: z.object({ id: z.string(), merchantId: z.string(), maxAmountPaise: z.number().int().positive(), categories: z.array(z.string()), maxQuantity: z.number().int().positive(), expiresAt: z.string().datetime(), recurringAllowed: z.boolean(), approvalThresholdPaise: z.number().int().positive() }),
+  proposedTotalPaise: z.number().int().positive(), approved: z.literal(true)
+});
+
+export async function POST(request: NextRequest) {
+  const key = request.headers.get("idempotency-key");
+  if (!key) return NextResponse.json({ error: "Idempotency-Key is required" }, { status: 400 });
+  const parsed = schema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "invalid payment-link request" }, { status: 400 });
+  const mandate = { ...parsed.data.mandate, canonicalHash: canonicalMandateHash(parsed.data.mandate) };
+  const policy = evaluatePolicy({ items: parsed.data.items, mandate, proposedTotalPaise: parsed.data.proposedTotalPaise });
+  if (policy.decision === "DENY") return NextResponse.json({ policy, state: "POLICY_BLOCKED" }, { status: 409 });
+  const referenceId = `ar_pl_${createHash("sha256").update(key).digest("hex").slice(0, 16)}`;
+  const link = await razorpayClient().paymentLink.create({ amount: policy.authoritativeTotalPaise, currency: "INR", accept_partial: false, reference_id: referenceId, description: "AgentReady policy-authorized cart", customer: { name: "AgentReady Demo Buyer", email: "buyer@example.com", contact: "+919000000000" }, notify: { email: false, sms: false, whatsapp: false }, reminder_enable: false, notes: { mandate_hash: mandate.canonicalHash } }) as unknown as { id: string; short_url: string; amount: number; status: string };
+  return NextResponse.json({ id: link.id, shortUrl: link.short_url, amountPaise: link.amount, status: link.status, policy, state: "CHECKOUT_PENDING", testMode: true }, { status: 201 });
+}
