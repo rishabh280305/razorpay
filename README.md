@@ -22,7 +22,7 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 The production deployment uses OpenAI Structured Outputs for intent extraction, a server-side bounded growth planner, Neon Postgres as the authoritative catalog and commerce ledger, Razorpay TEST Orders/Checkout/Payment Links plus gated Invoice, Subscription and Refund adapters, a durable ACP checkout lifecycle, an MCP tool surface, and a tamper-evident audit chain. Every AI response has a deterministic safe fallback.
 
-Razorpay TEST Orders and Payment Links have been exercised against production. A captured Checkout payment and real webhook delivery still require a manual TEST checkout plus Razorpay dashboard webhook secret. The UI therefore reports zero successful payments and zero verified webhooks until those events actually occur. No fake payment, webhook, protocol certification, or merchant revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
+Razorpay TEST Orders, Payment Links and Invoices have been exercised against production. The webhook secret is configured in Vercel and invalid signatures are rejected in production; real delivery still requires enabling the endpoint in the Razorpay TEST dashboard and completing a manual TEST checkout. The UI therefore reports zero successful payments and zero verified Razorpay-delivered webhooks until those events actually occur. No fake payment, webhook, protocol certification, or merchant revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
 
 ## Architecture
 

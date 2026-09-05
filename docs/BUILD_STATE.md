@@ -31,13 +31,13 @@
 - [x] Full-refund adapter accepts no client amount, requires a captured stored payment and forwards Razorpay's refund idempotency header.
 - [x] Production TEST Invoice issued for ₹1,498 with a hosted Razorpay link; Subscription probe failed closed with `INTEGRATION_UNAVAILABLE` for this account.
 - [x] Refund denial smoke returned `PAYMENT_NOT_FOUND`, created no financial action, and the persistent audit chain remained intact at 16/16.
+- [x] Razorpay webhook secret stored as a sensitive Vercel Production variable; production health reports configured and an invalid-signature probe returns HTTP 401.
 
 ## Credentials / manual actions still needed
 
-1. `RAZORPAY_WEBHOOK_SECRET` from the Razorpay **TEST Mode** dashboard to verify real webhook delivery.
-2. Configure the test webhook at `https://agentready-beige.vercel.app/api/webhooks/razorpay` for `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid`.
-3. Complete one manual Razorpay TEST Checkout so payment capture and webhook finality can be honestly marked verified.
-4. Optional: set `CATALOG_ADMIN_KEY` to enable authenticated catalog writes (reads and file validation already work).
+1. Configure the TEST webhook at `https://agentready-beige.vercel.app/api/webhooks/razorpay` for `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid` using the same configured secret.
+2. Complete one manual Razorpay TEST Checkout so payment capture and Razorpay-delivered webhook finality can be honestly marked verified.
+3. Optional: set `CATALOG_ADMIN_KEY` to enable authenticated catalog writes (reads and file validation already work).
 
 ## Key commands
 
@@ -45,4 +45,4 @@
 
 ## Current blocker
 
-Only dashboard webhook configuration and one manual TEST payment block a verified end-to-end receipt. Database, Razorpay TEST Order/Payment Link, and application deployment are active. Public demo: `https://agentready-beige.vercel.app`.
+Only dashboard webhook enablement and one manual TEST payment block a Razorpay-delivered end-to-end receipt. Database, hosted AI, Razorpay TEST Orders/Payment Links/Invoices, webhook signature enforcement and application deployment are active. Public demo: `https://agentready-beige.vercel.app`.
