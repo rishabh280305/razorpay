@@ -8,6 +8,8 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 **Public demo:** https://agentready-beige.vercel.app
 
+![AgentReady control plane](public/agentready-hero.png)
+
 ## 30-second walkthrough
 
 1. A buyer describes a bounded intent: “sensitive-skin routine under ₹2,000; no fragrance.”
@@ -18,9 +20,9 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 ## Product scope and truthful status
 
-The repository ships a polished seeded Demo Merchant experience, deterministic policy engine, ACP-style checkout-session adapter, machine-readable feed, audit hash chain, failure lab, and reproducible offline benchmark. It is deployable without secrets.
+The production deployment uses OpenAI Structured Outputs for intent extraction, a server-side bounded growth planner, Neon Postgres as the authoritative catalog and commerce ledger, Razorpay TEST Orders/Checkout/Payment Links, a durable ACP checkout lifecycle, an MCP tool surface, and a tamper-evident audit chain. Every AI response has a deterministic safe fallback.
 
-Razorpay TEST Orders and Payment Links are enabled and verified against the deployed server. Checkout payment completion and webhook delivery still require a judge/user test payment plus dashboard webhook configuration. Durable database persistence remains environment-gated. No fake payment, webhook, or revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
+Razorpay TEST Orders and Payment Links have been exercised against production. A captured Checkout payment and real webhook delivery still require a manual TEST checkout plus Razorpay dashboard webhook secret. The UI therefore reports zero successful payments and zero verified webhooks until those events actually occur. No fake payment, webhook, protocol certification, or merchant revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
 
 ## Architecture
 
@@ -53,15 +55,16 @@ flowchart LR
 ## Features
 
 - Premium responsive command center with clear **synthetic vs. real TEST Mode** labels.
-- Authoritative catalog seed with categories, inventory, compatibility and subscription eligibility; raw [catalog feed](/api/catalog/feed).
-- Buyer Agent developer trace, Growth Agent proposal, proposed/authorized/executed cart distinctions.
-- Deterministic controls: max spend, category allowlist, quantity cap, expiry, approval threshold, inventory freshness, price drift, duplicate execution.
+- Authoritative Neon catalog with twelve realistic products, integer-paise money, category/tag/attribute search, cross-sell relationships, authenticated JSON ingestion and client CSV/JSON validation; raw [catalog feed](/api/catalog/feed).
+- Live OpenAI buyer intent extraction through schema-constrained Responses API output, timeout/retry bounds, cost metadata and a deterministic parser fallback.
+- Growth Agent planner that may propose only authoritative IDs and only within buyer budget; proposed, authorized and executed carts remain visually distinct.
+- Deterministic controls for transaction and daily ceilings, item price, categories, quantity, expiry, approval, margin, absolute/relative upsell, inventory/catalog freshness, price drift, recurring permission, identity, cooldown, automated attempts and duplicate execution.
 - Hash-bound mandate and append-only SHA-256 audit-chain primitives.
 - Explicit finite-state commerce transition guard.
 - Razorpay TEST Mode adapter: Orders, Checkout signature utility, HMAC-SHA256 raw webhook verification, replay protection.
 - Discoverable MCP Streamable HTTP JSON-RPC tools, OpenAPI 3.1 contract, and protected Payment Links.
-- ACP implementation profile: versioned checkout sessions, request IDs, idempotency and lifecycle endpoints; no claim of certification.
-- Protocol Lab, Judge Mode, Audit Trail, and one-click Price Drift Chaos Lab.
+- Durable ACP implementation profile: versioned checkout sessions, request IDs, Neon-backed idempotency and lifecycle endpoints; no claim of certification.
+- Protocol Lab, Agent Readiness scorecard, Judge Mode, command palette, Audit Trail, and a server-executed Price Drift Chaos Lab.
 - Fixed-seed offline evaluation generated into `evaluation/results.json`.
 
 ## Razorpay integration
@@ -85,7 +88,7 @@ For standard Checkout, client completion is only a UX signal. Server verificatio
 
 **AP2.** A canonical intent/mandate hash is linked to policy and payment evidence, inspired by AP2’s Checkout Mandate / Receipt model. This is **AP2 compatibility concept only**, not official certification. [AP2 specification](https://github.com/google-agentic-commerce/AP2/blob/main/docs/ap2/specification.md).
 
-**MCP.** The safe tool surface is specified in [docs/ACP.md](docs/ACP.md); an external MCP server must call the same policy-gated APIs and cannot obtain arbitrary payment capability. **x402/UAP:** neither is treated as Razorpay settlement; UAP is not claimed as implemented due to insufficient public specification reviewed for this submission.
+**MCP.** `/api/mcp` implements Streamable HTTP JSON-RPC discovery plus bounded `search_products`, `get_product`, `recommend_bundle` and `evaluate_checkout` tools. It reads the same Neon catalog; payment execution is deliberately absent. **x402/UAP:** neither is treated as Razorpay settlement; UAP is not claimed as implemented due to insufficient public specification reviewed for this submission.
 
 ## Growth evaluation
 
@@ -95,7 +98,7 @@ Current generated result: baseline GMV **₹3,68,600**, AgentReady GMV **₹4,15
 
 ## Failure demo
 
-Run **Chaos Lab → Run price drift demo**. An approved ₹1,799 cart changes to ₹2,049 before execution against a ₹2,000 mandate. Re-verification returns `DENY` with `PRICE_CHANGED` and `BUDGET_EXCEEDED`; no Razorpay Order is created. More: [docs/FAILURE_HANDLING.md](docs/FAILURE_HANDLING.md).
+Run **Chaos Lab → Run server failure demo**. The server evaluates an approved ₹1,799 cart after its authoritative value changes to ₹2,049 against a ₹2,000 mandate. It returns HTTP `409`, `DENY`, `PRICE_CHANGED`, `BUDGET_EXCEEDED`, an explicit `razorpayActionCreated: false`, and appends the denial to Neon. More: [docs/FAILURE_HANDLING.md](docs/FAILURE_HANDLING.md).
 
 ## Local setup
 
@@ -116,6 +119,8 @@ The demo works without credentials. Add TEST credentials only to unlock actual R
 | `RAZORPAY_WEBHOOK_SECRET` | Webhook HMAC | Server only |
 | `DATABASE_URL` | Durable persistence | Server only |
 | `OPENAI_API_KEY` | Hosted structured AI | Server only |
+| `OPENAI_MODEL` | Model override; defaults to `gpt-5.4-mini` | Server only |
+| `CATALOG_ADMIN_KEY` | Authenticated catalog writes | Server only |
 | `NEXT_PUBLIC_APP_URL` | Absolute callback URLs | Public |
 
 ## Commands and testing
@@ -127,7 +132,7 @@ npm run benchmark             # deterministic offline artifact
 npm run build                 # CI / Vercel build
 ```
 
-Tests cover policy decisions, price drift, approval thresholds, transitions, audit tampering, deterministic evaluation and raw-body webhook verification. External Razorpay APIs are not required for normal CI.
+Fourteen tests cover policy decisions, extended controls, price drift, approval thresholds, mandate canonicalization, authoritative ID resolution, bounded growth, no-upsell behavior, transitions, audit tampering, deterministic evaluation and raw-body webhook verification. External OpenAI and Razorpay APIs are not required for normal CI.
 
 ## API surface
 
@@ -135,6 +140,10 @@ Tests cover policy decisions, price drift, approval thresholds, transitions, aud
 |---|---|
 | `GET /api/health` | Non-secret readiness state |
 | `GET /api/catalog/feed` | Agent-readable catalog |
+| `GET /api/catalog` | Authoritative catalog records and source |
+| `POST /api/catalog` | Admin-key protected JSON upsert |
+| `POST /api/ai/plan` | Schema-validated intent + bounded commerce plan |
+| `POST /api/chaos/price-drift` | Server-side safe failure exercise |
 | `POST /api/checkout/order` | Policy-gated Razorpay TEST Order |
 | `POST /api/checkout/verify` | Verify Checkout success signature server-side |
 | `POST /api/payment-links` | Policy-gated Razorpay TEST Payment Link |
@@ -170,10 +179,17 @@ Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo S
 
 ## Limitations and next steps
 
-- The seeded deployment intentionally uses demo-memory state until a managed Postgres URL is configured; Vercel function memory is not durable.
-- Hosted LLM structured output is provider-gated. The current demo’s intent path is deterministic, preventing unavailable credentials from being misrepresented as AI execution.
+- The public deployment is a single demo merchant and intentionally omits end-user authentication; catalog mutation is therefore admin-key protected rather than exposed in the browser.
+- OpenAI is used for bounded intent extraction, not payment decisions. A model/API failure falls back to deterministic parsing and is labeled in the UI.
 - Razorpay subscriptions, invoices and refunds are intentionally not faked. Payment Links are enabled and TEST-account verified; refunds remain approval-gated future scope until a captured TEST payment exists.
 - No claim of ACP/AP2 certification, UAP compliance, x402 settlement, or live payment processing is made.
+
+## What broke, and what we fixed
+
+- **Duplicate Vercel execution:** process memory did not protect idempotency across functions. We moved claims to a unique Neon ledger and added Razorpay receipt reconciliation; repeated payloads now return one Order.
+- **Audit verification after JSONB persistence:** Postgres reordered nested evidence keys. We replaced shallow serialization with recursive canonical JSON and retained a compatibility verifier for the original smoke event.
+- **Serverless ACP sessions:** an in-memory map could disappear between lifecycle calls. ACP create/read/update/complete/cancel now use the same durable checkout tables as web checkout.
+- **Scripted AI experience:** the initial UX animated static constraints. The production route now invokes schema-constrained OpenAI output, validates it with Zod, resolves only Neon product IDs, and visibly labels fallback behavior.
 
 ## License
 

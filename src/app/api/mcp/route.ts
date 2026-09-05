@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { findProduct, products, searchCatalog } from "@/lib/catalog";
-import { evaluatePolicy } from "@/lib/policy";
+import { evaluatePolicyWithCatalog } from "@/lib/policy";
 import { canonicalMandateHash } from "@/lib/mandate";
+import { getCatalogProducts } from "@/db/repository";
 
 export const dynamic = "force-dynamic";
 const protocolVersion = "2026-07-28";
@@ -27,8 +27,10 @@ export async function POST(request: NextRequest) {
   if (method !== "tools/call") return error(id, -32601, "Method not found", 404);
   const name = typeof params.name === "string" ? params.name : "";
   const args = typeof params.arguments === "object" && params.arguments ? params.arguments as Record<string, unknown> : {};
+  const catalog = await getCatalogProducts();
+  const findProduct = (productId: string) => catalog.find(product => product.id === productId);
   let data: unknown;
-  if (name === "search_products") data = searchCatalog(String(args.query ?? "")).slice(0, 6);
+  if (name === "search_products") { const terms = String(args.query ?? "").toLowerCase().split(/\W+/).filter(Boolean); data = catalog.filter(product => terms.some(term => `${product.name} ${product.description} ${product.category} ${product.tags.join(" ")}`.toLowerCase().includes(term))).slice(0, 6); }
   else if (name === "get_product") data = findProduct(String(args.product_id ?? "")) ?? { error: "product_not_found" };
   else if (name === "recommend_bundle") {
     const ids = Array.isArray(args.product_ids) ? args.product_ids.map(String) : [];
@@ -40,7 +42,8 @@ export async function POST(request: NextRequest) {
     const ids = Array.isArray(args.product_ids) ? args.product_ids.map(String) : [];
     const max = Number(args.max_amount_paise ?? 0); const expiresAt = new Date(Date.now() + 20 * 60_000).toISOString();
     const base = { id: `mcp_${crypto.randomUUID()}`, merchantId: "m_demo", maxAmountPaise: max, categories: [], maxQuantity: 5, expiresAt, recurringAllowed: false, approvalThresholdPaise: Math.max(1, max) };
-    data = evaluatePolicy({ items: ids.map(productId => ({ productId, quantity: 1 })), mandate: { ...base, canonicalHash: canonicalMandateHash(base) } });
+    try { data = evaluatePolicyWithCatalog({ items: ids.map(productId => ({ productId, quantity: 1 })), mandate: { ...base, canonicalHash: canonicalMandateHash(base) }, catalog }); }
+    catch { return error(id, -32602, "One or more product IDs are invalid"); }
   } else return error(id, -32602, "Unknown or unauthorized tool");
   return rpc(id, { content: [{ type: "text", text: JSON.stringify(data) }], isError: false });
 }

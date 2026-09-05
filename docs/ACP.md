@@ -6,17 +6,17 @@ ACP is currently beta. AGENTREADY uses the latest stable specification reviewed 
 
 | Operation | Route | Guard |
 |---|---|---|
-| Create | `POST /api/acp/checkout_sessions` | `Idempotency-Key`, request ID, schema, authoritative policy |
-| Retrieve | `GET /api/acp/checkout_sessions/:id` | scoped session lookup |
+| Create | `POST /api/acp/checkout_sessions` | `Idempotency-Key`, request ID, schema, Neon catalog, authoritative policy |
+| Retrieve | `GET /api/acp/checkout_sessions/:id` | durable Neon session lookup |
 | Update | `PATCH /api/acp/checkout_sessions/:id` | re-evaluates policy |
 | Complete | `POST /api/acp/checkout_sessions/:id/complete` | approval and duplicate guard |
 | Cancel | `POST /api/acp/checkout_sessions/:id/cancel` | refuses impossible cancellation |
 
-Every adapter action becomes the same normalized commerce session used by the UI. It is not a disconnected “protocol demo.” Payment remains on merchant rails and is only attempted by the Razorpay boundary after authorization.
+Every adapter action becomes the same normalized commerce session used by the UI. Session, mandate and line-item state survives Vercel function instances in Neon, while a deterministic key-derived checkout ID makes create idempotent. It is not a disconnected “protocol demo.” Payment remains on merchant rails and is only attempted by the Razorpay boundary after authorization.
 
 ## MCP connection model
 
-The deployed Streamable HTTP JSON-RPC server is discoverable at `/.well-known/mcp.json` and available at `/api/mcp` using protocol revision `2026-07-28`. It exposes `search_products`, `get_product`, `recommend_bundle`, and `evaluate_checkout`. Payment execution is deliberately absent; MCP clients must continue through the authenticated checkout API and policy firewall. No tool accepts an arbitrary price, raw Razorpay credential, generic SQL, or unrestricted payment action.
+The deployed Streamable HTTP JSON-RPC server is discoverable at `/.well-known/mcp.json` and available at `/api/mcp` using protocol revision `2026-07-28`. It exposes `search_products`, `get_product`, `recommend_bundle`, and `evaluate_checkout`, all backed by the Neon catalog. Payment execution is deliberately absent; MCP clients must continue through the authenticated checkout API and policy firewall. No tool accepts an arbitrary price, raw Razorpay credential, generic SQL, or unrestricted payment action.
 
 ## AP2 / x402 / UAP scope
 

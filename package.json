@@ -1,6 +1,6 @@
 {
   "name": "agentready",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Safe, agent-readable commerce for Razorpay merchants.",
   "scripts": {
@@ -10,13 +10,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "benchmark": "tsx scripts/run-benchmark.ts"
-    ,"db:generate": "drizzle-kit generate"
-    ,"db:migrate": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs migrate"
+    "benchmark": "tsx scripts/run-benchmark.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs migrate"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "next": "^16.3.4",
+    "openai": "^7.10.0",
     "postgres": "^3.4.9",
     "razorpay": "^2.9.8",
     "react": "^19.2.8",

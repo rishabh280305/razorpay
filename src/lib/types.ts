@@ -3,11 +3,31 @@ export type Product = {
   pricePaise: number; compareAtPaise?: number; costPaise: number; inventory: number;
   tags: string[]; attributes: Record<string, string>; image: string;
   crossSellIds: string[]; subscriptionEligible: boolean; available: boolean;
+  updatedAt?: string;
 };
 
 export type CartItem = { productId: string; quantity: number; unitPricePaise: number };
 export type Decision = "ALLOW" | "DENY" | "REQUIRE_APPROVAL";
-export type ReasonCode = "BUDGET_EXCEEDED" | "PRICE_CHANGED" | "INVENTORY_CHANGED" | "HUMAN_APPROVAL_REQUIRED" | "DUPLICATE_REQUEST" | "MANDATE_EXPIRED" | "CATEGORY_BLOCKED" | "MARGIN_FLOOR_VIOLATION" | "QUANTITY_EXCEEDED" | "UPSELL_LIMIT_EXCEEDED";
+export type ReasonCode = "BUDGET_EXCEEDED" | "DAILY_BUDGET_EXCEEDED" | "ITEM_PRICE_EXCEEDED" | "PRICE_CHANGED" | "INVENTORY_CHANGED" | "CATALOG_STALE" | "HUMAN_APPROVAL_REQUIRED" | "DUPLICATE_REQUEST" | "MANDATE_EXPIRED" | "CATEGORY_BLOCKED" | "MARGIN_FLOOR_VIOLATION" | "QUANTITY_EXCEEDED" | "UPSELL_LIMIT_EXCEEDED" | "RECURRING_NOT_ALLOWED" | "ATTEMPT_LIMIT_EXCEEDED" | "TRANSACTION_COOLDOWN" | "AGENT_IDENTITY_MISMATCH";
+
+export type PolicyControls = {
+  dailyBudgetPaise: number;
+  dailySpentPaise: number;
+  maximumItemPricePaise: number;
+  deniedCategories: string[];
+  merchantMarginFloorBps: number;
+  maximumUpsellPaise: number;
+  maximumUpsellPercent: number;
+  maximumAutomatedAttempts: number;
+  automatedAttempts: number;
+  cooldownActive: boolean;
+  catalogMaxAgeMs: number;
+  expectedAgentIdentity?: string;
+  actualAgentIdentity?: string;
+  priceChangeTolerancePaise: number;
+  recurringRequested: boolean;
+  baseCartTotalPaise?: number;
+};
 
 export type Mandate = {
   id: string; merchantId: string; maxAmountPaise: number; categories: string[];

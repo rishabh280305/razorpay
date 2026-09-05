@@ -4,10 +4,10 @@
 
 - `RAZORPAY_KEY_SECRET` and webhook secret are server-only; they are never returned, logged, committed, or placed in `NEXT_PUBLIC_*` variables.
 - Browser amounts are non-authoritative. Checkout takes product IDs/quantities, rehydrates catalog values server-side, and computes paise totals deterministically.
-- An LLM cannot call a generic payment tool. It only produces bounded candidate intent / explanations; Zod validates structured inputs.
+- OpenAI cannot call a generic payment tool. It returns only a Zod-validated intent schema; deterministic code resolves product IDs, constructs a bounded proposal and revalidates all money inputs.
 - Every financial action requires an idempotency key and a state-machine-valid transition.
 
-The order adapter derives a deterministic Razorpay receipt from the idempotency key and queries Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. The production smoke test confirmed one Order ID across two identical requests. A Postgres unique constraint remains the planned first-write reservation for fully atomic multi-instance concurrency.
+The order adapter atomically claims a unique idempotency record in Neon, derives a deterministic Razorpay receipt, and reconciles with Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. Production smoke testing confirmed one Order ID across two identical requests.
 
 ## Webhooks and Checkout
 
@@ -15,11 +15,13 @@ The webhook route consumes `request.text()` before JSON parsing, verifies the HM
 
 ## Policy engine
 
-Policy returns only `ALLOW`, `DENY`, `REQUIRE_APPROVAL`, plus reason codes: `BUDGET_EXCEEDED`, `PRICE_CHANGED`, `INVENTORY_CHANGED`, `HUMAN_APPROVAL_REQUIRED`, `DUPLICATE_REQUEST`, `MANDATE_EXPIRED`, `CATEGORY_BLOCKED`, `QUANTITY_EXCEEDED`. Price/inventory are checked immediately before a Razorpay action.
+Policy returns only `ALLOW`, `DENY`, `REQUIRE_APPROVAL`. It covers transaction/daily spend, item ceiling, price drift, inventory/catalog freshness, approval, duplicates, mandate expiry, categories, quantity, margin, upsell caps, recurring permission, automated attempts, cooldown and agent identity. Price/inventory are queried from Neon immediately before a Razorpay action.
 
 ## HTTP and operations
 
-Security headers are set globally. API request IDs are passed through. User-facing errors are generic; secrets are absent from logs. Add a durable `webhook_event` uniqueness constraint and distributed rate limiter with Postgres/Redis when `DATABASE_URL` is configured; process-memory dedupe is intentionally only a demo fallback.
+Security headers are set globally. API request IDs are passed through. User-facing errors are generic; structured logs strip key/token/secret/signature/prompt fields. Webhook event hashes and idempotency claims have database uniqueness constraints. The expensive AI route is rate-limited; multi-region production scale would move its short window counter to managed Redis.
+
+Catalog writes require a constant-time checked `x-agentready-admin-key`; the public browser exposes read and validation flows only. OpenAI responses are created with `store: false`, a 12-second timeout and one bounded retry.
 
 ## Audit privacy
 
