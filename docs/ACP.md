@@ -16,7 +16,7 @@ Every adapter action becomes the same normalized commerce session used by the UI
 
 ## MCP connection model
 
-An external MCP server can safely expose `search_products`, `get_product`, `create_cart`, `recommend_bundle`, `create_checkout_session`, `get_checkout_session`, `request_purchase_approval`, `complete_checkout`, and `cancel_checkout`. Each calls the routes above, with per-merchant authentication and the same policy firewall. No MCP tool may accept an arbitrary price, raw Razorpay credential, generic SQL, or unrestricted payment action.
+The deployed Streamable HTTP JSON-RPC server is discoverable at `/.well-known/mcp.json` and available at `/api/mcp` using protocol revision `2026-07-28`. It exposes `search_products`, `get_product`, `recommend_bundle`, and `evaluate_checkout`. Payment execution is deliberately absent; MCP clients must continue through the authenticated checkout API and policy firewall. No tool accepts an arbitrary price, raw Razorpay credential, generic SQL, or unrestricted payment action.
 
 ## AP2 / x402 / UAP scope
 

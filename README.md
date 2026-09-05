@@ -20,7 +20,7 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 The repository ships a polished seeded Demo Merchant experience, deterministic policy engine, ACP-style checkout-session adapter, machine-readable feed, audit hash chain, failure lab, and reproducible offline benchmark. It is deployable without secrets.
 
-Razorpay Orders/Checkout and durable database persistence are **environment-gated**: the UI and `/api/health` explicitly show them as unavailable until credentials are configured. No fake payment, webhook, or revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
+Razorpay TEST Orders and Payment Links are enabled and verified against the deployed server. Checkout payment completion and webhook delivery still require a judge/user test payment plus dashboard webhook configuration. Durable database persistence remains environment-gated. No fake payment, webhook, or revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
 
 ## Architecture
 
@@ -59,6 +59,7 @@ flowchart LR
 - Hash-bound mandate and append-only SHA-256 audit-chain primitives.
 - Explicit finite-state commerce transition guard.
 - Razorpay TEST Mode adapter: Orders, Checkout signature utility, HMAC-SHA256 raw webhook verification, replay protection.
+- Discoverable MCP Streamable HTTP JSON-RPC tools, OpenAPI 3.1 contract, and protected Payment Links.
 - ACP implementation profile: versioned checkout sessions, request IDs, idempotency and lifecycle endpoints; no claim of certification.
 - Protocol Lab, Judge Mode, Audit Trail, and one-click Price Drift Chaos Lab.
 - Fixed-seed offline evaluation generated into `evaluation/results.json`.
@@ -66,6 +67,8 @@ flowchart LR
 ## Razorpay integration
 
 The integration is intentionally TEST MODE only. `POST /api/checkout/order` derives the final amount from product IDs on the server, requires `Idempotency-Key`, evaluates policy, and only then calls Razorpay Orders. The browser never supplies an authoritative amount or uses `KEY_SECRET`.
+
+Production smoke verification created a ₹1,498 TEST Order and ₹1,498 TEST Payment Link. A duplicate request with the same idempotency key returned the same Razorpay Order ID. No payment was captured during this automated smoke test.
 
 Webhook endpoint: `POST /api/webhooks/razorpay`
 
@@ -133,7 +136,11 @@ Tests cover policy decisions, price drift, approval thresholds, transitions, aud
 | `GET /api/health` | Non-secret readiness state |
 | `GET /api/catalog/feed` | Agent-readable catalog |
 | `POST /api/checkout/order` | Policy-gated Razorpay TEST Order |
+| `POST /api/checkout/verify` | Verify Checkout success signature server-side |
+| `POST /api/payment-links` | Policy-gated Razorpay TEST Payment Link |
 | `POST /api/webhooks/razorpay` | Verified, idempotent Razorpay event intake |
+| `GET/POST /api/mcp` | Discoverable MCP Streamable HTTP tool server |
+| `GET /api/openapi` | OpenAPI 3.1 developer contract |
 | `POST /api/acp/checkout_sessions` | ACP-profile create session |
 | `GET/PATCH /api/acp/checkout_sessions/:id` | Retrieve/update session |
 | `POST /api/acp/checkout_sessions/:id/complete` | Policy-gated completion |
@@ -165,7 +172,7 @@ Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo S
 
 - The seeded deployment intentionally uses demo-memory state until a managed Postgres URL is configured; Vercel function memory is not durable.
 - Hosted LLM structured output is provider-gated. The current demo’s intent path is deterministic, preventing unavailable credentials from being misrepresented as AI execution.
-- Razorpay subscriptions, payment links, invoices and refunds are intentionally not faked. They will be enabled only after account capability and TEST credentials are verified.
+- Razorpay subscriptions, invoices and refunds are intentionally not faked. Payment Links are enabled and TEST-account verified; refunds remain approval-gated future scope until a captured TEST payment exists.
 - No claim of ACP/AP2 certification, UAP compliance, x402 settlement, or live payment processing is made.
 
 ## License

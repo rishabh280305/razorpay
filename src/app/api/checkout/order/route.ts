@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
   const key = request.headers.get("idempotency-key");
   if (!key) return NextResponse.json({ error: "Idempotency-Key is required", requestId }, { status: 400 });
-  if (idempotency.has(key)) return NextResponse.json(idempotency.get(key), { headers: { "x-request-id": requestId } });
+  if (idempotency.has(key)) return NextResponse.json({ ...(idempotency.get(key) as object), idempotentReplay: true }, { headers: { "x-request-id": requestId } });
   const parsed = bodySchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: "invalid checkout request", requestId }, { status: 400 });
   if (!isTestKey()) return NextResponse.json({ error: "Only Razorpay TEST Mode credentials are accepted", requestId }, { status: 503 });

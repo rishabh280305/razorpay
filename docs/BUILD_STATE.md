@@ -14,11 +14,14 @@
 - [x] Policy, state-machine, audit hashing, Razorpay signature helpers, ACP session adapter, health/feed endpoints.
 - [x] Fixed-seed 500-session benchmark artifact and safety tests.
 - [x] Documentation, CI workflow, GitHub push and Vercel production deployment.
+- [x] Production Razorpay credentials configured as encrypted server-only values.
+- [x] Real TEST Order and Payment Link created; duplicate request returned one Order ID.
+- [x] MCP Streamable HTTP server, discovery document and OpenAPI 3.1 endpoint.
 
 ## Credentials / manual actions still needed
 
 1. `DATABASE_URL` for Neon/Supabase/Postgres durable records and migrations.
-2. `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` from a Razorpay **TEST Mode** account to verify the payment rail.
+2. `RAZORPAY_WEBHOOK_SECRET` from the Razorpay **TEST Mode** dashboard to verify real webhook delivery.
 3. Optional `OPENAI_API_KEY` for provider-backed structured intent extraction.
 4. After a stable Vercel deployment, configure Razorpay test webhook at `https://<deployment>/api/webhooks/razorpay` for `payment.authorized`, `payment.captured`, `payment.failed`, `order.paid`.
 
@@ -28,4 +31,4 @@
 
 ## Current blocker
 
-Credentials are not present; no real Razorpay order, webhook delivery, durable database write, or hosted LLM operation can honestly be verified yet. Public demo: `https://agentready-beige.vercel.app`.
+Razorpay TEST Orders and Payment Links are verified. A managed Postgres URL, hosted AI key, and webhook secret/configuration are still needed for durable records, live model reasoning, and webhook-finalized payment evidence. Public demo: `https://agentready-beige.vercel.app`.

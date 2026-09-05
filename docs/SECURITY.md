@@ -7,6 +7,8 @@
 - An LLM cannot call a generic payment tool. It only produces bounded candidate intent / explanations; Zod validates structured inputs.
 - Every financial action requires an idempotency key and a state-machine-valid transition.
 
+The order adapter derives a deterministic Razorpay receipt from the idempotency key and queries Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. The production smoke test confirmed one Order ID across two identical requests. A Postgres unique constraint remains the planned first-write reservation for fully atomic multi-instance concurrency.
+
 ## Webhooks and Checkout
 
 The webhook route consumes `request.text()` before JSON parsing, verifies the HMAC against `X-Razorpay-Signature`, rejects bad signatures, and deduplicates the raw-body SHA-256. This preserves Razorpay’s raw-body verification requirement. Checkout signature verification uses the canonical `order_id|payment_id` message.
