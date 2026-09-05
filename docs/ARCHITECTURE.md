@@ -30,4 +30,6 @@ Terminal safety branches are `POLICY_BLOCKED`, `CANCELLED`, `EXPIRED`, and `PAYM
 
 Production uses Neon Postgres through Drizzle. Implemented tables are `merchants`, `products`, `agent_sessions`, `mandates`, `checkout_sessions`, `commerce_orders`, `idempotency_records`, `webhook_events`, `audit_events`, and `benchmark_runs`. Unique indexes protect merchant SKU, checkout/idempotency keys, Razorpay IDs, webhook hashes and audit hashes. ACP lifecycle calls and web checkout share these tables.
 
+Orders, Payment Links, Invoices and Subscriptions are separate Razorpay adapters over the same authorization kernel. Invoices reconstitute line items from authoritative products; recurring purchases add a `recurringAllowed` mandate check plus product eligibility. Refunds travel in the reverse direction and are gated by captured payment evidence in `commerce_orders`; the refundable amount is never accepted from an AI or browser. Every consequential adapter outcome is appended to the shared audit chain.
+
 If `DATABASE_URL` is omitted locally, read-only catalog/planning code can use the source-controlled seed. Money execution is intended for the durable deployed path.

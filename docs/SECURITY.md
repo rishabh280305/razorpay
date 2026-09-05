@@ -10,9 +10,11 @@
 
 The order adapter atomically claims a unique idempotency record in Neon, derives a deterministic Razorpay receipt, and reconciles with Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. Production smoke testing confirmed one Order ID across two identical requests.
 
+Invoice and Subscription adapters reuse the same ledger and deterministic request fingerprints. Invoice line items are rebuilt from the current Neon rows. Subscription creation additionally requires `subscriptionEligible` catalog metadata and a canonical mandate with `recurringAllowed: true`; Plans are reconciled before creation because Razorpay Plans are immutable. The Refund adapter never accepts an amount: it looks up a captured AgentReady order by verified Razorpay payment ID, derives a full refund from stored paise, requires a literal human confirmation, and forwards the request key through Razorpay's `X-Refund-Idempotency` header.
+
 ## Webhooks and Checkout
 
-The webhook route consumes `request.text()` before JSON parsing, verifies the HMAC against `X-Razorpay-Signature`, rejects bad signatures, and deduplicates the raw-body SHA-256. This preserves Razorpay’s raw-body verification requirement. Checkout signature verification uses the canonical `order_id|payment_id` message.
+The webhook route consumes `request.text()` before JSON parsing, verifies the HMAC against `X-Razorpay-Signature`, rejects bad signatures, and deduplicates the raw-body SHA-256. This preserves Razorpay’s raw-body verification requirement. Checkout signature verification uses the canonical `order_id|payment_id` message and binds the verified payment ID to its stored order; only a later captured/confirmed state can become refund-eligible.
 
 ## Policy engine
 

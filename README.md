@@ -20,7 +20,7 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 ## Product scope and truthful status
 
-The production deployment uses OpenAI Structured Outputs for intent extraction, a server-side bounded growth planner, Neon Postgres as the authoritative catalog and commerce ledger, Razorpay TEST Orders/Checkout/Payment Links, a durable ACP checkout lifecycle, an MCP tool surface, and a tamper-evident audit chain. Every AI response has a deterministic safe fallback.
+The production deployment uses OpenAI Structured Outputs for intent extraction, a server-side bounded growth planner, Neon Postgres as the authoritative catalog and commerce ledger, Razorpay TEST Orders/Checkout/Payment Links plus gated Invoice, Subscription and Refund adapters, a durable ACP checkout lifecycle, an MCP tool surface, and a tamper-evident audit chain. Every AI response has a deterministic safe fallback.
 
 Razorpay TEST Orders and Payment Links have been exercised against production. A captured Checkout payment and real webhook delivery still require a manual TEST checkout plus Razorpay dashboard webhook secret. The UI therefore reports zero successful payments and zero verified webhooks until those events actually occur. No fake payment, webhook, protocol certification, or merchant revenue claim is made. See [docs/BUILD_STATE.md](docs/BUILD_STATE.md).
 
@@ -55,13 +55,13 @@ flowchart LR
 ## Features
 
 - Premium responsive command center with clear **synthetic vs. real TEST Mode** labels.
-- Authoritative Neon catalog with twelve realistic products, integer-paise money, category/tag/attribute search, cross-sell relationships, authenticated JSON ingestion and client CSV/JSON validation; raw [catalog feed](/api/catalog/feed).
+- Authoritative Neon catalog with thirteen realistic products, integer-paise money, category/tag/attribute search, cross-sell relationships, authenticated JSON ingestion and client CSV/JSON validation; raw [catalog feed](/api/catalog/feed).
 - Live OpenAI buyer intent extraction through schema-constrained Responses API output, timeout/retry bounds, cost metadata and a deterministic parser fallback.
 - Growth Agent planner that may propose only authoritative IDs and only within buyer budget; proposed, authorized and executed carts remain visually distinct.
 - Deterministic controls for transaction and daily ceilings, item price, categories, quantity, expiry, approval, margin, absolute/relative upsell, inventory/catalog freshness, price drift, recurring permission, identity, cooldown, automated attempts and duplicate execution.
 - Hash-bound mandate and append-only SHA-256 audit-chain primitives.
 - Explicit finite-state commerce transition guard.
-- Razorpay TEST Mode adapter: Orders, Checkout signature utility, HMAC-SHA256 raw webhook verification, replay protection.
+- Razorpay TEST Mode adapter: Orders, Checkout, Payment Links, Invoices, Subscriptions, idempotent full refunds, HMAC-SHA256 raw webhook verification and replay protection.
 - Discoverable MCP Streamable HTTP JSON-RPC tools, OpenAPI 3.1 contract, and protected Payment Links.
 - Durable ACP implementation profile: versioned checkout sessions, request IDs, Neon-backed idempotency and lifecycle endpoints; no claim of certification.
 - Protocol Lab, Agent Readiness scorecard, Judge Mode, command palette, Audit Trail, and a server-executed Price Drift Chaos Lab.
@@ -72,6 +72,8 @@ flowchart LR
 The integration is intentionally TEST MODE only. `POST /api/checkout/order` derives the final amount from product IDs on the server, requires `Idempotency-Key`, evaluates policy, and only then calls Razorpay Orders. The browser never supplies an authoritative amount or uses `KEY_SECRET`.
 
 Production smoke verification created a ₹1,498 TEST Order and ₹1,498 TEST Payment Link. A duplicate request with the same idempotency key returned the same Razorpay Order ID. No payment was captured during this automated smoke test.
+
+The secondary operations use the same safety boundary. [Invoices](https://razorpay.com/docs/api/payments/invoices/create-with-details/) rebuild line items from Neon and require a matching durable mandate. [Subscriptions](https://razorpay.com/docs/api/payments/subscriptions/create-subscription/) require a subscription-eligible product and a mandate whose canonical payload explicitly allows recurring spend. Refund requests accept no amount from the browser: they resolve a captured AgentReady payment, derive the full stored order amount, require an explicit confirmation phrase, and forward the same idempotency key in Razorpay's [`X-Refund-Idempotency`](https://razorpay.com/docs/api/refunds/normal-refunds-idempotent/) header. Account availability and production smoke status are reported separately below; an implemented adapter is not described as verified until exercised.
 
 Webhook endpoint: `POST /api/webhooks/razorpay`
 
@@ -132,7 +134,7 @@ npm run benchmark             # deterministic offline artifact
 npm run build                 # CI / Vercel build
 ```
 
-Fourteen tests cover policy decisions, extended controls, price drift, approval thresholds, mandate canonicalization, authoritative ID resolution, bounded growth, no-upsell behavior, transitions, audit tampering, deterministic evaluation and raw-body webhook verification. External OpenAI and Razorpay APIs are not required for normal CI.
+Seventeen tests cover policy decisions, extended controls, price drift, approval thresholds, mandate canonicalization, authoritative ID resolution, bounded growth, no-upsell behavior, transitions, audit tampering, deterministic evaluation, refund eligibility and raw-body webhook verification. External OpenAI and Razorpay APIs are not required for normal CI.
 
 ## API surface
 
@@ -148,6 +150,9 @@ Fourteen tests cover policy decisions, extended controls, price drift, approval 
 | `POST /api/checkout/order` | Policy-gated Razorpay TEST Order |
 | `POST /api/checkout/verify` | Verify Checkout success signature server-side |
 | `POST /api/payment-links` | Policy-gated Razorpay TEST Payment Link |
+| `POST /api/invoices` | Policy-gated Razorpay TEST Invoice |
+| `POST /api/subscriptions` | Recurring-mandate-gated TEST Plan + Subscription |
+| `POST /api/refunds` | Idempotent full TEST refund for a captured stored payment |
 | `POST /api/webhooks/razorpay` | Verified, idempotent Razorpay event intake |
 | `GET/POST /api/mcp` | Discoverable MCP Streamable HTTP tool server |
 | `GET /api/openapi` | OpenAPI 3.1 developer contract |
@@ -182,7 +187,7 @@ Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo S
 
 - The public deployment is a single demo merchant and intentionally omits end-user authentication; catalog mutation is therefore admin-key protected rather than exposed in the browser.
 - OpenAI is used for bounded intent extraction, not payment decisions. A model/API failure falls back to deterministic parsing and is labeled in the UI.
-- Razorpay subscriptions, invoices and refunds are intentionally not faked. Payment Links are enabled and TEST-account verified; refunds remain approval-gated future scope until a captured TEST payment exists.
+- Invoice and Subscription adapters are implemented and fail closed when unavailable to the TEST account; their live verification status is recorded in `docs/BUILD_STATE.md`. Refunds remain deliberately unavailable until a verified webhook marks an AgentReady payment captured.
 - No claim of ACP/AP2 certification, UAP compliance, x402 settlement, or live payment processing is made.
 
 ## What broke, and what we fixed

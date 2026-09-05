@@ -20,13 +20,15 @@
 - [x] Neon migration applied and production database health verified.
 - [x] Durable ACP lifecycle and idempotency moved from process memory to Neon.
 - [x] Hosted AI key stored as a sensitive Vercel variable; production Structured Outputs call verified.
-- [x] Authenticated catalog API, CSV/JSON validation, 12-product seed and Agent Readiness scorecard.
+- [x] Authenticated catalog API, CSV/JSON validation, 13-product seed and Agent Readiness scorecard.
 - [x] Server-side price-drift chaos exercise persists its blocked evidence.
-- [x] 14 pure safety/planning tests passing locally.
+- [x] 17 pure safety/planning tests passing locally.
 - [x] Production OpenAI smoke: `gpt-5.4-mini-2026-03-17`, schema-valid intent, authoritative `p_cleanser` + `p_moisturizer`, ₹1,498 total, no fallback.
 - [x] Production ACP create/retrieve/replay used one durable checkout ID; chaos denial joined an intact 4/4 audit chain.
 - [x] Independent fixed-seed benchmark: 500 sessions, five archetypes, ₹80,736 incremental simulated GMV (+10.9%), 0% budget/policy violations.
 - [x] Production authorization smoke: client `approved: true` alone returned 409; persisted 64-character mandate hash returned 201 and unlocked one ₹1,498 Razorpay TEST Order.
+- [x] Gated Razorpay Invoice and Subscription adapters use authoritative catalog values, durable mandates, account-aware failure states and the shared audit/idempotency ledger.
+- [x] Full-refund adapter accepts no client amount, requires a captured stored payment and forwards Razorpay's refund idempotency header.
 
 ## Credentials / manual actions still needed
 
