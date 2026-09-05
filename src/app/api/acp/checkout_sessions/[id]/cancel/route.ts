@@ -1,0 +1,3 @@
+import { NextRequest, NextResponse } from "next/server";
+import { sessions } from "../../route";
+export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) { const { id } = await params; const session = sessions.get(id); if (!session) return NextResponse.json({ error: { code: "not_found" } }, { status: 404 }); if (["RAZORPAY_ORDER_CREATED", "COMPLETED"].includes(session.state)) return NextResponse.json({ error: { code: "cannot_cancel" } }, { status: 409 }); session.state = "CANCELLED"; return NextResponse.json({ api_version: "2026-04-17", checkout_session: session }); }

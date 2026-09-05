@@ -1,0 +1,17 @@
+{
+  "seed": 20260219,
+  "sessions": 500,
+  "baselineGmvPaise": 36860000,
+  "treatmentGmvPaise": 41592400,
+  "baselineAovPaise": 73720,
+  "treatmentAovPaise": 83185,
+  "incrementalRevenuePaise": 4732400,
+  "upliftPercent": 12.8,
+  "attachRatePercent": 15.2,
+  "budgetViolationRatePercent": 0,
+  "policyViolationRatePercent": 0,
+  "acceptanceRatePercent": 15.2,
+  "checkoutCompletionProxyPercent": 91.4,
+  "status": "offline synthetic evaluation",
+  "notes": "Same fixed buyer population and seed are used for baseline and AgentReady treatment."
+}

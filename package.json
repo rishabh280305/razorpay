@@ -1,0 +1,30 @@
+{
+  "name": "agentready",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Safe, agent-readable commerce for Razorpay merchants.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "benchmark": "tsx scripts/run-benchmark.ts"
+  },
+  "dependencies": {
+    "next": "^16.3.4",
+    "razorpay": "^2.9.8",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0",
+    "tsx": "^4.20.6"
+  }
+}
