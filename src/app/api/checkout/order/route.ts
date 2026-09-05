@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createTestOrder } from "@/lib/razorpay";
+import { createTestOrder, findTestOrderByReceipt } from "@/lib/razorpay";
 import { recomputeCart, evaluatePolicy } from "@/lib/policy";
 import { createHash } from "crypto";
 import { canonicalMandateHash } from "@/lib/mandate";
@@ -21,8 +21,12 @@ export async function POST(request: NextRequest) {
   const mandate = { ...parsed.data.mandate, canonicalHash };
   const policy = evaluatePolicy({ items: parsed.data.items, mandate, proposedTotalPaise: parsed.data.proposedTotalPaise, previousExecution: false });
   if (policy.decision === "DENY" || (policy.decision === "REQUIRE_APPROVAL" && !parsed.data.approved)) return NextResponse.json({ policy, state: policy.decision === "DENY" ? "POLICY_BLOCKED" : "AWAITING_APPROVAL", requestId }, { status: 409 });
-  const order = await createTestOrder({ amount: policy.authoritativeTotalPaise, receipt: `ar_${createHash("sha256").update(key).digest("hex").slice(0, 18)}`, notes: { agentready_request_id: requestId, mandate_hash: canonicalHash } });
-  const response = { order: { id: order.id, amount: order.amount, currency: order.currency, status: order.status }, keyId: process.env.RAZORPAY_KEY_ID, policy, mandateHash: canonicalHash, state: "RAZORPAY_ORDER_CREATED", requestId };
+  const receipt = `ar_${createHash("sha256").update(key).digest("hex").slice(0, 18)}`;
+  const fingerprint = createHash("sha256").update(JSON.stringify({ items: parsed.data.items, mandate, proposedTotalPaise: parsed.data.proposedTotalPaise })).digest("hex");
+  const existing = await findTestOrderByReceipt(receipt);
+  if (existing && (existing.notes?.idempotency_fingerprint !== fingerprint || Number(existing.amount) !== policy.authoritativeTotalPaise)) return NextResponse.json({ error: "Idempotency-Key was already used with a different checkout payload", requestId }, { status: 409 });
+  const order = existing ?? await createTestOrder({ amount: policy.authoritativeTotalPaise, receipt, notes: { agentready_request_id: requestId, mandate_hash: canonicalHash, idempotency_fingerprint: fingerprint } });
+  const response = { order: { id: order.id, amount: order.amount, currency: order.currency, status: order.status }, keyId: process.env.RAZORPAY_KEY_ID, policy, mandateHash: canonicalHash, state: "RAZORPAY_ORDER_CREATED", idempotentReplay: Boolean(existing), requestId };
   idempotency.set(key, response);
   return NextResponse.json(response, { status: 201, headers: { "x-request-id": requestId } });
 }

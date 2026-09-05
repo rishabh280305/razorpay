@@ -11,6 +11,11 @@ export async function createTestOrder(input: { amount: number; receipt: string; 
   return razorpayClient().orders.create({ amount: input.amount, currency: "INR", receipt: input.receipt, notes: input.notes });
 }
 
+export async function findTestOrderByReceipt(receipt: string) {
+  const result = await razorpayClient().orders.all({ receipt, count: 10 });
+  return result.items.find(order => order.receipt === receipt) ?? null;
+}
+
 export function validWebhookSignature(rawBody: string, signature: string | null) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   if (!secret || !signature) return false;
