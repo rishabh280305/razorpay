@@ -29,6 +29,8 @@
 - [x] Production authorization smoke: client `approved: true` alone returned 409; persisted 64-character mandate hash returned 201 and unlocked one ₹1,498 Razorpay TEST Order.
 - [x] Gated Razorpay Invoice and Subscription adapters use authoritative catalog values, durable mandates, account-aware failure states and the shared audit/idempotency ledger.
 - [x] Full-refund adapter accepts no client amount, requires a captured stored payment and forwards Razorpay's refund idempotency header.
+- [x] Production TEST Invoice issued for ₹1,498 with a hosted Razorpay link; Subscription probe failed closed with `INTEGRATION_UNAVAILABLE` for this account.
+- [x] Refund denial smoke returned `PAYMENT_NOT_FOUND`, created no financial action, and the persistent audit chain remained intact at 16/16.
 
 ## Credentials / manual actions still needed
 

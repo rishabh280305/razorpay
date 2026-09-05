@@ -71,7 +71,7 @@ flowchart LR
 
 The integration is intentionally TEST MODE only. `POST /api/checkout/order` derives the final amount from product IDs on the server, requires `Idempotency-Key`, evaluates policy, and only then calls Razorpay Orders. The browser never supplies an authoritative amount or uses `KEY_SECRET`.
 
-Production smoke verification created a ₹1,498 TEST Order and ₹1,498 TEST Payment Link. A duplicate request with the same idempotency key returned the same Razorpay Order ID. No payment was captured during this automated smoke test.
+Production smoke verification created a ₹1,498 TEST Order, ₹1,498 TEST Payment Link and ₹1,498 issued TEST Invoice. A duplicate request with the same idempotency key returned the same Razorpay Order ID. This TEST account rejected Subscription creation, which the product reports as unavailable instead of faking success. No payment was captured during this automated smoke test.
 
 The secondary operations use the same safety boundary. [Invoices](https://razorpay.com/docs/api/payments/invoices/create-with-details/) rebuild line items from Neon and require a matching durable mandate. [Subscriptions](https://razorpay.com/docs/api/payments/subscriptions/create-subscription/) require a subscription-eligible product and a mandate whose canonical payload explicitly allows recurring spend. Refund requests accept no amount from the browser: they resolve a captured AgentReady payment, derive the full stored order amount, require an explicit confirmation phrase, and forward the same idempotency key in Razorpay's [`X-Refund-Idempotency`](https://razorpay.com/docs/api/refunds/normal-refunds-idempotent/) header. Account availability and production smoke status are reported separately below; an implemented adapter is not described as verified until exercised.
 
@@ -187,7 +187,7 @@ Read [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Demo S
 
 - The public deployment is a single demo merchant and intentionally omits end-user authentication; catalog mutation is therefore admin-key protected rather than exposed in the browser.
 - OpenAI is used for bounded intent extraction, not payment decisions. A model/API failure falls back to deterministic parsing and is labeled in the UI.
-- Invoice and Subscription adapters are implemented and fail closed when unavailable to the TEST account; their live verification status is recorded in `docs/BUILD_STATE.md`. Refunds remain deliberately unavailable until a verified webhook marks an AgentReady payment captured.
+- The Invoice adapter is TEST-account verified. The Subscription adapter is implemented but this TEST account rejects creation and the UI says so. Refunds remain deliberately unavailable until a verified webhook marks an AgentReady payment captured.
 - No claim of ACP/AP2 certification, UAP compliance, x402 settlement, or live payment processing is made.
 
 ## What broke, and what we fixed
