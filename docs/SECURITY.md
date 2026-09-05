@@ -6,6 +6,7 @@
 - Browser amounts are non-authoritative. Checkout takes product IDs/quantities, rehydrates catalog values server-side, and computes paise totals deterministically.
 - OpenAI cannot call a generic payment tool. It returns only a Zod-validated intent schema; deterministic code resolves product IDs, constructs a bounded proposal and revalidates all money inputs.
 - Every financial action requires an idempotency key and a state-machine-valid transition.
+- An `approved: true` browser field is never sufficient authority. Checkout and Payment Links require a non-expired Neon mandate row whose canonical hash exactly matches the recomputed request mandate.
 
 The order adapter atomically claims a unique idempotency record in Neon, derives a deterministic Razorpay receipt, and reconciles with Razorpay before creation. A reused key with a different payload fingerprint is rejected; an identical retry returns the existing Order. Production smoke testing confirmed one Order ID across two identical requests.
 
@@ -26,3 +27,4 @@ Catalog writes require a constant-time checked `x-agentready-admin-key`; the pub
 ## Audit privacy
 
 Audit records store concise evidence summaries, policy result, mandate hash and entity IDs—never LLM chain-of-thought or payment credentials.
+The append operation runs inside a Postgres transaction guarded by an advisory lock, so concurrent Vercel functions cannot fork the global hash chain between reading the previous hash and inserting the next event.

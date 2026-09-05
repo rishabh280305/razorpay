@@ -14,7 +14,7 @@ AGENTREADY is a full-stack agentic-commerce control plane for the Razorpay AI Bu
 
 1. A buyer describes a bounded intent: “sensitive-skin routine under ₹2,000; no fragrance.”
 2. The Buyer Agent turns it into constraints and resolves real catalog IDs; the Growth Agent proposes a complementary product but never adds it silently.
-3. Before money moves, the server re-reads price/inventory, evaluates a buyer mandate in deterministic code, then either allows, denies, or requires approval.
+3. Before money moves, the server re-reads price/inventory, evaluates a buyer mandate in deterministic code, then either allows, denies, or requires a durable hash-matched approval.
 4. Only an authorized cart can create a server-side Razorpay **TEST Mode** Order. Checkout signature and raw-body webhook verification complete the evidence chain.
 5. The Audit Trail and Chaos Lab make every decision—and a blocked price-drift failure—inspectable.
 
@@ -143,6 +143,7 @@ Fourteen tests cover policy decisions, extended controls, price drift, approval 
 | `GET /api/catalog` | Authoritative catalog records and source |
 | `POST /api/catalog` | Admin-key protected JSON upsert |
 | `POST /api/ai/plan` | Schema-validated intent + bounded commerce plan |
+| `POST /api/approvals` | Persist a canonical hash-bound mandate |
 | `POST /api/chaos/price-drift` | Server-side safe failure exercise |
 | `POST /api/checkout/order` | Policy-gated Razorpay TEST Order |
 | `POST /api/checkout/verify` | Verify Checkout success signature server-side |

@@ -19,10 +19,12 @@
 - [x] MCP Streamable HTTP server, discovery document and OpenAPI 3.1 endpoint.
 - [x] Neon migration applied and production database health verified.
 - [x] Durable ACP lifecycle and idempotency moved from process memory to Neon.
-- [x] Hosted AI key stored as a sensitive Vercel variable; live production model smoke test pending this deployment.
+- [x] Hosted AI key stored as a sensitive Vercel variable; production Structured Outputs call verified.
 - [x] Authenticated catalog API, CSV/JSON validation, 12-product seed and Agent Readiness scorecard.
 - [x] Server-side price-drift chaos exercise persists its blocked evidence.
 - [x] 14 pure safety/planning tests passing locally.
+- [x] Production OpenAI smoke: `gpt-5.4-mini-2026-03-17`, schema-valid intent, authoritative `p_cleanser` + `p_moisturizer`, ₹1,498 total, no fallback.
+- [x] Production ACP create/retrieve/replay used one durable checkout ID; chaos denial joined an intact 4/4 audit chain.
 
 ## Credentials / manual actions still needed
 
